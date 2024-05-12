@@ -4,8 +4,8 @@ import (
 	"errors"
 	"ms-auth/model"
 	pb "ms-auth/pb/auth"
+	"net/http"
 
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
@@ -27,7 +27,7 @@ func (ar *AuthRepositoryImpl) Insert(req *pb.RegisterRequest) (*pb.RegisterRespo
 	}
 	res := ar.db.Create(userReq)
 	if res.Error != nil {
-		return &pb.RegisterResponse{}, status.Errorf(codes.Internal, res.Error.Error())
+		return &pb.RegisterResponse{}, status.Errorf(http.StatusInternalServerError, res.Error.Error())
 	}
 
 	return &pb.RegisterResponse{
@@ -44,10 +44,10 @@ func (ar *AuthRepositoryImpl) FindUser(req *pb.LoginRequest) (*pb.LoginResponse,
 	loginRes := new(pb.LoginResponse)
 	res := ar.db.Where("email = ?", req.Email).First(loginRes)
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-		return &pb.LoginResponse{}, status.Errorf(codes.NotFound, res.Error.Error())
+		return &pb.LoginResponse{}, status.Errorf(http.StatusNotFound, res.Error.Error())
 	}
 	if res.Error != nil {
-		return &pb.LoginResponse{}, status.Errorf(codes.Internal, res.Error.Error())
+		return &pb.LoginResponse{}, status.Errorf(http.StatusInternalServerError, res.Error.Error())
 	}
 
 	return loginRes, nil
