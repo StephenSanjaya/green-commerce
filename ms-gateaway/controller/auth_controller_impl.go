@@ -17,7 +17,7 @@ func NewAuthController(authGRPC pb.AuthServiceClient) AuthControllerI {
 	return &AuthControllerImpl{authGRPC: authGRPC}
 }
 
-func (ac *AuthControllerImpl) Register(c echo.Context) error {
+func (ac *AuthControllerImpl) RegisterAuth(c echo.Context) error {
 	req := &pb.RegisterRequest{}
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
@@ -39,7 +39,7 @@ func (ac *AuthControllerImpl) Register(c echo.Context) error {
 
 }
 
-func (ac *AuthControllerImpl) Login(c echo.Context) error {
+func (ac *AuthControllerImpl) LoginAuth(c echo.Context) error {
 	req := &pb.LoginRequest{}
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
