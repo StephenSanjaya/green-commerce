@@ -16,7 +16,7 @@ func AuthClientGRPC() controller.AuthControllerI {
 	}
 
 	authClient := pb.NewAuthServiceClient(authConn)
-	defer authConn.Close()
+	// defer authConn.Close()
 
 	authCtrler := controller.NewAuthController(authClient)
 

@@ -14,8 +14,8 @@ func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
 
 	auth := e.Group("/api/v1")
 	{
-		auth.POST("/register", cs.AuthCtrler.Register)
-		auth.POST("/login", cs.AuthCtrler.Login)
+		auth.POST("/register", cs.AuthCtrler.RegisterAuth)
+		auth.POST("/login", cs.AuthCtrler.LoginAuth)
 	}
 
 }
