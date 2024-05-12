@@ -1,11 +1,11 @@
 package model
 
 type User struct {
-	UserId   int     `json:"user_id,omitempty" gorm:"column:user_id"`
+	ID       int     `json:"user_id,omitempty" gorm:"column:user_id"`
 	FullName string  `json:"full_name"`
 	Email    string  `json:"email"`
 	Password string  `json:"password"`
 	Balance  float64 `json:"balance"`
 	Address  string  `json:"address"`
-	Role     string  `json:"role"`
+	Role     string  `json:"role,omitempty" gorm:"default:user"`
 }

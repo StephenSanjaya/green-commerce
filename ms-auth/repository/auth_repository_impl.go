@@ -31,7 +31,7 @@ func (ar *AuthRepositoryImpl) Insert(req *pb.RegisterRequest) (*pb.RegisterRespo
 	}
 
 	return &pb.RegisterResponse{
-		UserId:   int64(userReq.UserId),
+		UserId:   int64(userReq.ID),
 		FullName: userReq.FullName,
 		Email:    userReq.Email,
 		Balance:  userReq.Balance,
