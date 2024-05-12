@@ -7,6 +7,6 @@ import (
 )
 
 type AuthControllerI interface {
-	Register(context.Context, *pb.RegisterRequest) (*pb.RegisterResponse, error)
-	Login(context.Context, *pb.LoginRequest) (*pb.LoginResponse, error)
+	RegisterAuth(context.Context, *pb.RegisterRequest) (*pb.RegisterResponse, error)
+	LoginAuth(context.Context, *pb.LoginRequest) (*pb.LoginResponse, error)
 }
