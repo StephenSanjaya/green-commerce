@@ -22,9 +22,8 @@ func (ar *AuthRepositoryImpl) Insert(req *pb.RegisterRequest) (*pb.RegisterRespo
 	userReq := &model.User{
 		FullName: req.FullName,
 		Email:    req.Email,
-		Balance:  0,
+		Password: req.Password,
 		Address:  req.Address,
-		Role:     req.Role,
 	}
 	res := ar.db.Create(userReq)
 	if res.Error != nil {
@@ -32,7 +31,7 @@ func (ar *AuthRepositoryImpl) Insert(req *pb.RegisterRequest) (*pb.RegisterRespo
 	}
 
 	return &pb.RegisterResponse{
-		UserId:   userReq.UserId,
+		UserId:   int64(userReq.UserId),
 		FullName: userReq.FullName,
 		Email:    userReq.Email,
 		Balance:  userReq.Balance,
