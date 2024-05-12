@@ -42,7 +42,7 @@ func (ar *AuthRepositoryImpl) Insert(req *pb.RegisterRequest) (*pb.RegisterRespo
 
 func (ar *AuthRepositoryImpl) FindUser(req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	loginRes := new(pb.LoginResponse)
-	res := ar.db.Where("email = ?", req.Email).First(loginRes)
+	res := ar.db.Model(&model.User{}).Where("email = ?", req.Email).First(loginRes)
 	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 		return &pb.LoginResponse{}, status.Errorf(http.StatusNotFound, res.Error.Error())
 	}
