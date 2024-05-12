@@ -22,7 +22,7 @@ message RegisterRequest {
     string full_name = 1;
     string email = 2;
     string password = 3;
-    string address = 5;
+    string address = 4;
 }
 message RegisterResponse {
     int64 user_id = 1;
