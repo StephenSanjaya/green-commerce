@@ -10,7 +10,7 @@ import (
 
 func CreateJWT(user *pb.LoginResponse) (string, error) {
 	claims := jwt.MapClaims{
-		"id":    user.Id,
+		"id":    user.UserId,
 		"email": user.Email,
 		"exp":   time.Now().Add(time.Hour * 1).Unix(),
 	}
