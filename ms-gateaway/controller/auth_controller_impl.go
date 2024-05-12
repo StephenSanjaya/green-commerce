@@ -22,7 +22,6 @@ func (ac *AuthControllerImpl) RegisterAuth(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
 	}
-	req.Role = "user"
 
 	hashedPass := helper.HashedPassword(req.Password)
 	req.Password = hashedPass
