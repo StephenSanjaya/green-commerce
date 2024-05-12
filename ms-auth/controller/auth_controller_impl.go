@@ -20,15 +20,7 @@ func (ac *AuthControllerImpl) RegisterAuth(c context.Context, req *pb.RegisterRe
 	if err != nil {
 		return &pb.RegisterResponse{}, err
 	}
-
-	return &pb.RegisterResponse{
-		UserId:   res.UserId,
-		FullName: res.FullName,
-		Email:    res.Email,
-		Balance:  res.Balance,
-		Address:  res.Address,
-		Role:     res.Role,
-	}, nil
+	return res, nil
 }
 
 func (ac *AuthControllerImpl) LoginAuth(c context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
@@ -37,9 +29,5 @@ func (ac *AuthControllerImpl) LoginAuth(c context.Context, req *pb.LoginRequest)
 		return &pb.LoginResponse{}, err
 	}
 
-	return &pb.LoginResponse{
-		UserId:   res.UserId,
-		Email:    res.Email,
-		Password: res.Password,
-	}, nil
+	return res, nil
 }
