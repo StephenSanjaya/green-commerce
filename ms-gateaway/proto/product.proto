@@ -1,0 +1,37 @@
+syntax = "proto3";
+package product;
+
+option go_package = "pb/product";
+
+import "google/protobuf/Empty.proto";
+
+service ProductService {
+    rpc GetAllProduct (google.protobuf.Empty) returns (ProductResponses);
+    rpc GetProduct (ProductId) returns (ProductResponse);
+    rpc AddProduct (ProductRequest) returns (ProductResponse);
+    rpc DeleteProduct (ProductId) returns (google.protobuf.Empty);
+    rpc UpdateProduct (ProductId) returns (google.protobuf.Empty);
+}
+
+message ProductId {
+    int64 product_id = 1;
+}
+
+message ProductResponses {
+    repeated ProductResponse products = 1;
+}
+
+message ProductResponse {
+    int64 product_id = 1;
+    string name = 2;
+    string description = 3;
+    int64 stock = 4;
+    double price = 5;
+}
+
+message ProductRequest {
+    string name = 1;
+    string description = 2;
+    int64 stock = 3;
+    double price = 4;
+}

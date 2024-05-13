@@ -14,9 +14,11 @@ func main() {
 	e.HTTPErrorHandler = middleware.ErrorHandler
 
 	authCtrler := cmd.AuthClientGRPC()
+	productCtrler := cmd.ProductClientGRPC()
 
 	ctrlers := &router.ControllerStruct{
-		AuthCtrler: authCtrler,
+		AuthCtrler:    authCtrler,
+		ProductCtrler: productCtrler,
 	}
 
 	ctrlers.SetupRouter(e)
