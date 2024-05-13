@@ -1,21 +1,7 @@
 version: "3"
 services:
-  postgres:
-    image: postgres:16-alpine
-    restart: always
-    container_name: postgres
-    ports:
-      - "5432:5432"
-  auth:
-    container_name: ms-auth
-    environment:
-      DATABASE_HOST: ${DATABASE_HOST}
-      DATABASE_NAME: ${DATABASE_NAME}
-      DATABASE_PORT: ${DATABASE_PORT}
-      DATABASE_USERNAME: ${DATABASE_USERNAME}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-    build: .
+  ms-auth:
+    container_name: ms-auth-cont
+    image: ms-auth
     ports:
       - "50051:50051"
-    depends_on:
-      - postgres
