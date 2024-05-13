@@ -1,9 +1,9 @@
 version: "3"
 services:
-  gateaway:
-    container_name: ms-gateaway
+  ms-gateaway:
+    container_name: ms-gateaway-cont
     environment:
-      SECRET_KEY: ${SECRET_KEY}
-    build: .
+      - SECRET_KEY=${SECRET_KEY}
+    image: ms-gateaway
     ports:
       - "8081:8081"
