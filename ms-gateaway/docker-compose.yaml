@@ -1,0 +1,9 @@
+version: "3"
+services:
+  gateaway:
+    container_name: ms-gateaway
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+    build: .
+    ports:
+      - "8081:8081"
