@@ -3,6 +3,7 @@ package controller
 import (
 	pb "ms-gateaway/pb/product"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc/status"
@@ -22,6 +23,7 @@ func (pc *ProductControllerImpl) GetAllProduct(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(int(status.Code(err)), "failed to get all product: "+err.Error())
 	}
+
 	return c.JSON(http.StatusOK, echo.Map{
 		"message":  "success get all products",
 		"products": res,
@@ -30,12 +32,15 @@ func (pc *ProductControllerImpl) GetAllProduct(c echo.Context) error {
 
 func (pc *ProductControllerImpl) GetProduct(c echo.Context) error {
 	id := c.Param("id")
+	product_id, _ := strconv.Atoi(id)
 	req := &pb.ProductId{
-		ProductId: id,
+		ProductId: int64(product_id),
 	}
+
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
 	}
+
 	res, err := pc.productGRPC.GetProduct(c.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(int(status.Code(err)), "failed to get product: "+err.Error())
@@ -65,9 +70,10 @@ func (pc *ProductControllerImpl) AddProduct(c echo.Context) error {
 }
 
 func (pc *ProductControllerImpl) DeleteProduct(c echo.Context) error {
-	productId := c.Param("id")
+	id := c.Param("id")
+	product_id, _ := strconv.Atoi(id)
 	req := &pb.ProductId{
-		ProductId: productId,
+		ProductId: int64(product_id),
 	}
 
 	_, err := pc.productGRPC.DeleteProduct(c.Request().Context(), req)
