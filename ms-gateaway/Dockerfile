@@ -15,6 +15,3 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 EXPOSE 8081
 
 CMD [ "./main" ]
-
-# docker build -t ms-gateaway .
-# docker run --name ms-gateaway-container --rm -it -p 8081:8081 ms-gateaway
