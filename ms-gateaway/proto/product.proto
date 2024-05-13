@@ -7,7 +7,7 @@ import "google/protobuf/Empty.proto";
 
 service ProductService {
     rpc GetAllProduct (google.protobuf.Empty) returns (ProductResponses);
-    rpc GetProduct (ProductName) returns (ProductResponse);
+    rpc GetProduct (ProductId) returns (ProductResponse);
     rpc AddProduct (ProductRequest) returns (ProductResponse);
     rpc DeleteProduct (ProductId) returns (google.protobuf.Empty);
     rpc UpdateProduct (ProductId) returns (google.protobuf.Empty);
@@ -15,10 +15,6 @@ service ProductService {
 
 message ProductId {
     string product_id = 1;
-}
-
-message ProductName {
-    string name = 1;
 }
 
 message ProductResponses {

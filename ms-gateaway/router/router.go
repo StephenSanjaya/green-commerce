@@ -13,20 +13,21 @@ type ControllerStruct struct {
 
 func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
 
-	auth := e.Group("/api/v1")
+	api := e.Group("/api/v1")
 	{
-		auth.POST("/register", cs.AuthCtrler.RegisterAuth)
-		auth.POST("/login", cs.AuthCtrler.LoginAuth)
-	}
+		auth := api.Group("/auth")
+		{
+			auth.POST("/register", cs.AuthCtrler.RegisterAuth)
+			auth.POST("/login", cs.AuthCtrler.LoginAuth)
+		}
 
-	//product
-	product := e.Group("/api/v1/products")
-	{
-		product.POST("", cs.ProductCtrler.AddProduct)
-		product.GET("", cs.ProductCtrler.GetAllProduct)
-		product.GET("/:name", cs.ProductCtrler.GetProduct)
-		product.PUT("/:id", cs.ProductCtrler.UpdateProduct)
-		product.DELETE("/:id", cs.ProductCtrler.DeleteProduct)
+		product := api.Group("/products")
+		{
+			product.POST("", cs.ProductCtrler.AddProduct)
+			product.GET("", cs.ProductCtrler.GetAllProduct)
+			product.GET("/:id", cs.ProductCtrler.GetProduct)
+			product.PUT("/:id", cs.ProductCtrler.UpdateProduct)
+			product.DELETE("/:id", cs.ProductCtrler.DeleteProduct)
+		}
 	}
-
 }
