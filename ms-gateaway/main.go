@@ -4,6 +4,7 @@ import (
 	"ms-gateaway/cmd"
 	"ms-gateaway/middleware"
 	"ms-gateaway/router"
+	"os"
 
 	"github.com/labstack/echo/v4"
 )
@@ -23,5 +24,9 @@ func main() {
 
 	ctrlers.SetupRouter(e)
 
-	e.Logger.Fatal(e.Start(":8081"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8081"
+	}
+	e.Logger.Fatal(e.Start(":" + port))
 }
