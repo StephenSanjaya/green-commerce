@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"ms-product/model"
 	pb "ms-product/pb/product"
 	"net/http"
@@ -42,18 +41,6 @@ func (pr *ProductRepositoryImpl) Create(req *pb.ProductRequest) (*pb.ProductResp
 	}, nil
 }
 
-func (pr *ProductRepositoryImpl) Delete(id int) error {
-	res := pr.db.Delete(&model.Product{}, id)
-	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-		return status.Errorf(http.StatusNotFound, res.Error.Error())
-	}
-	if res.Error != nil {
-		return status.Errorf(http.StatusInternalServerError, res.Error.Error())
-	}
-
-	return nil
-}
-
 func (pr *ProductRepositoryImpl) FindAll() (*pb.ProductResponses, error) {
 	products := new([]model.Product)
 
@@ -81,7 +68,7 @@ func (pr *ProductRepositoryImpl) FindAll() (*pb.ProductResponses, error) {
 func (pr *ProductRepositoryImpl) FindOne(id int) (*pb.ProductResponse, error) {
 	product := new(model.Product)
 	res := pr.db.Find(product, id)
-	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+	if res.RowsAffected == 0 {
 		return &pb.ProductResponse{}, status.Errorf(http.StatusNotFound, res.Error.Error())
 	}
 	if res.Error != nil {
@@ -107,7 +94,7 @@ func (pr *ProductRepositoryImpl) Update(id int, req *pb.ProductRequest) (*pb.Pro
 		Stock:       req.Stock,
 		Price:       req.Price,
 	})
-	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+	if res.RowsAffected == 0 {
 		return &pb.ProductResponse{}, status.Errorf(http.StatusNotFound, res.Error.Error())
 	}
 	if res.Error != nil {
@@ -122,4 +109,16 @@ func (pr *ProductRepositoryImpl) Update(id int, req *pb.ProductRequest) (*pb.Pro
 		Stock:       product.Stock,
 		Price:       product.Price,
 	}, nil
+}
+
+func (pr *ProductRepositoryImpl) Delete(id int) error {
+	res := pr.db.Delete(&model.Product{}, id)
+	if res.RowsAffected == 0 {
+		return status.Errorf(http.StatusNotFound, res.Error.Error())
+	}
+	if res.Error != nil {
+		return status.Errorf(http.StatusInternalServerError, res.Error.Error())
+	}
+
+	return nil
 }
