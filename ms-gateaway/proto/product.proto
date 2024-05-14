@@ -10,7 +10,7 @@ service ProductService {
     rpc GetProduct (ProductId) returns (ProductResponse);
     rpc AddProduct (ProductRequest) returns (ProductResponse);
     rpc DeleteProduct (ProductId) returns (google.protobuf.Empty);
-    rpc UpdateProduct (ProductId) returns (google.protobuf.Empty);
+    rpc UpdateProduct (ProductRequest) returns (ProductResponse);
 }
 
 message ProductId {
