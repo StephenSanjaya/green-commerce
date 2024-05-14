@@ -29,3 +29,23 @@ func (uc *UserControllerImpl) AddProductToCart(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "Product added to cart successfully"})
 }
+
+func (uc *UserControllerImpl) TopUp(c echo.Context) error {
+	var req struct {
+		Amount float64 `json:"amount"`
+	}
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+	}
+
+	grpcReq := &pb.TopUpRequest{
+		Amount: req.Amount,
+	}
+
+	_, err := uc.userGRPC.TopUp(context.Background(), grpcReq)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to top up"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "top up successful"})
+}
