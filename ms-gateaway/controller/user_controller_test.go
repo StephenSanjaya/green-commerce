@@ -1,7 +1,7 @@
-package test
+package controller_test
 
 import (
-	"bytes"  
+	"bytes"
 	"context"
 	"encoding/json"
 	"ms-gateaway/controller"
