@@ -1,10 +1,10 @@
-package test
+package controller_test
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"ms-gateaway/controller"
+	"ms-gateaway/controller" 
 	"ms-gateaway/helper"
 	pb "ms-gateaway/pb/auth"
 	"net/http"
