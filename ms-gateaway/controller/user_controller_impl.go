@@ -1,51 +1,49 @@
 package controller
 
 import (
-	"context"
 	pb "ms-gateaway/pb/user"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"google.golang.org/grpc/status"
 )
 
 type UserControllerImpl struct {
 	userGRPC pb.UserServiceClient
 }
 
-func NewUserController(userGRPC pb.UserServiceClient) *UserControllerImpl {
+func NewUserController(userGRPC pb.UserServiceClient) UserControllerI {
 	return &UserControllerImpl{userGRPC: userGRPC}
 }
 
 func (uc *UserControllerImpl) AddProductToCart(c echo.Context) error {
 	var cartRequest pb.CartRequest
 	if err := c.Bind(&cartRequest); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
 	}
 
-	_, err := uc.userGRPC.AddProductToCart(context.Background(), &cartRequest)
+	_, err := uc.userGRPC.AddProductToCart(c.Request().Context(), &cartRequest)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add product to cart"})
+		return echo.NewHTTPError(int(status.Code(err)), "Failed to add product to cart: "+err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "Product added to cart successfully"})
+	return c.JSON(http.StatusCreated, echo.Map{
+		"message": "Product added to cart successfully",
+	})
 }
 
 func (uc *UserControllerImpl) TopUp(c echo.Context) error {
-	var req struct {
-		Amount float64 `json:"amount"`
-	}
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+	req := &pb.TopUpRequest{}
+	if err := c.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
 	}
 
-	grpcReq := &pb.TopUpRequest{
-		Amount: req.Amount,
-	}
-
-	_, err := uc.userGRPC.TopUp(context.Background(), grpcReq)
+	_, err := uc.userGRPC.TopUp(c.Request().Context(), req)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to top up"})
+		return echo.NewHTTPError(int(status.Code(err)), "failed to top up: "+err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "top up successful"})
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "top up successful",
+	})
 }
