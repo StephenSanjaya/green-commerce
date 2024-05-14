@@ -69,7 +69,7 @@ func (pr *ProductRepositoryImpl) FindOne(id int) (*pb.ProductResponse, error) {
 	product := new(model.Product)
 	res := pr.db.Find(product, id)
 	if res.RowsAffected == 0 {
-		return &pb.ProductResponse{}, status.Errorf(http.StatusNotFound, res.Error.Error())
+		return &pb.ProductResponse{}, status.Errorf(http.StatusNotFound, "product id not found")
 	}
 	if res.Error != nil {
 		return &pb.ProductResponse{}, status.Errorf(http.StatusInternalServerError, res.Error.Error())
@@ -95,7 +95,7 @@ func (pr *ProductRepositoryImpl) Update(id int, req *pb.ProductRequest) (*pb.Pro
 		Price:       req.Price,
 	})
 	if res.RowsAffected == 0 {
-		return &pb.ProductResponse{}, status.Errorf(http.StatusNotFound, res.Error.Error())
+		return &pb.ProductResponse{}, status.Errorf(http.StatusNotFound, "product id not found")
 	}
 	if res.Error != nil {
 		return &pb.ProductResponse{}, status.Errorf(http.StatusInternalServerError, res.Error.Error())
@@ -114,7 +114,7 @@ func (pr *ProductRepositoryImpl) Update(id int, req *pb.ProductRequest) (*pb.Pro
 func (pr *ProductRepositoryImpl) Delete(id int) error {
 	res := pr.db.Delete(&model.Product{}, id)
 	if res.RowsAffected == 0 {
-		return status.Errorf(http.StatusNotFound, res.Error.Error())
+		return status.Errorf(http.StatusNotFound, "product id not found")
 	}
 	if res.Error != nil {
 		return status.Errorf(http.StatusInternalServerError, res.Error.Error())
