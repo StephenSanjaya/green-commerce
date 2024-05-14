@@ -87,5 +87,21 @@ func (pc *ProductControllerImpl) DeleteProduct(c echo.Context) error {
 }
 
 func (pc *ProductControllerImpl) UpdateProduct(c echo.Context) error {
-	panic("unimplemented")
+	id := c.Param("id")
+	c.Set("product_id", id)
+
+	req := &pb.ProductRequest{}
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
+	}
+
+	res, err := pc.productGRPC.UpdateProduct(c.Request().Context(), req)
+	if err != nil {
+		return echo.NewHTTPError(int(status.Code(err)), "failed to update product: "+err.Error())
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success update product",
+		"product": res,
+	})
 }

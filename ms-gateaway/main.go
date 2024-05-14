@@ -16,10 +16,12 @@ func main() {
 
 	authCtrler := cmd.AuthClientGRPC()
 	productCtrler := cmd.ProductClientGRPC()
+	userCtrler := cmd.UserClientGRPC()
 
 	ctrlers := &router.ControllerStruct{
 		AuthCtrler:    authCtrler,
 		ProductCtrler: productCtrler,
+		UserCtrler:    userCtrler,
 	}
 
 	ctrlers.SetupRouter(e)
