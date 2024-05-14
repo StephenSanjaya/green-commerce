@@ -1,11 +1,13 @@
 package controller
 
 import (
+	"context"
 	pb "ms-gateaway/pb/product"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -88,14 +90,18 @@ func (pc *ProductControllerImpl) DeleteProduct(c echo.Context) error {
 
 func (pc *ProductControllerImpl) UpdateProduct(c echo.Context) error {
 	id := c.Param("id")
-	c.Set("product_id", id)
 
 	req := &pb.ProductRequest{}
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
 	}
 
-	res, err := pc.productGRPC.UpdateProduct(c.Request().Context(), req)
+	md := metadata.New(map[string]string{
+		"product_id": id,
+	})
+	ctx := context.Background()
+	ctxWithMetadata := metadata.NewOutgoingContext(ctx, md)
+	res, err := pc.productGRPC.UpdateProduct(ctxWithMetadata, req)
 	if err != nil {
 		return echo.NewHTTPError(int(status.Code(err)), "failed to update product: "+err.Error())
 	}
