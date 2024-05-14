@@ -16,6 +16,7 @@ message LoginResponse {
     int64 user_id = 1;
     string email = 2;
     string password = 3;
+    string role = 4;
 }
 
 message RegisterRequest {
