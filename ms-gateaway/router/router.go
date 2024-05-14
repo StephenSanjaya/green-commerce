@@ -2,6 +2,7 @@ package router
 
 import (
 	"ms-gateaway/controller"
+	"ms-gateaway/middleware"
 
 	"github.com/labstack/echo/v4"
 )
@@ -24,14 +25,18 @@ func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
 
 		product := api.Group("/products")
 		{
-			product.POST("", cs.ProductCtrler.AddProduct)
+			product.Use(middleware.AuthMiddleware("admin"))
+			{
+				product.POST("", cs.ProductCtrler.AddProduct)
+				product.PUT("/:id", cs.ProductCtrler.UpdateProduct)
+				product.DELETE("/:id", cs.ProductCtrler.DeleteProduct)
+			}
 			product.GET("", cs.ProductCtrler.GetAllProduct)
 			product.GET("/:id", cs.ProductCtrler.GetProduct)
-			product.PUT("/:id", cs.ProductCtrler.UpdateProduct)
-			product.DELETE("/:id", cs.ProductCtrler.DeleteProduct)
 		}
 
 		user := api.Group("/user")
+		user.Use(middleware.AuthMiddleware("user"))
 		{
 			user.POST("/topup", cs.UserCtrler.TopUp)
 			user.POST("/add-item", cs.UserCtrler.AddProductToCart)
