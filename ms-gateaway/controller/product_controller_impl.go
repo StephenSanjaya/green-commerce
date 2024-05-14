@@ -28,7 +28,7 @@ func (pc *ProductControllerImpl) GetAllProduct(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"message":  "success get all products",
-		"products": res,
+		"products": res.Products,
 	})
 }
 
