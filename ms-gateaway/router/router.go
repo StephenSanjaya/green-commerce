@@ -9,6 +9,7 @@ import (
 type ControllerStruct struct {
 	AuthCtrler    controller.AuthControllerI
 	ProductCtrler controller.ProductControllerI
+	UserCtrler    controller.UserControllerI
 }
 
 func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
@@ -28,6 +29,12 @@ func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
 			product.GET("/:id", cs.ProductCtrler.GetProduct)
 			product.PUT("/:id", cs.ProductCtrler.UpdateProduct)
 			product.DELETE("/:id", cs.ProductCtrler.DeleteProduct)
+		}
+
+		user := api.Group("/user")
+		{
+			user.POST("/topup", cs.UserCtrler.TopUp)
+			user.POST("/add-item", cs.UserCtrler.AddProductToCart)
 		}
 	}
 }
