@@ -4,7 +4,9 @@ import (
 	"context"
 	pb "ms-product/pb/product"
 	"ms-product/repository"
+	"strconv"
 
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -42,8 +44,14 @@ func (pc *ProductControllerImpl) AddProduct(c context.Context, req *pb.ProductRe
 }
 
 func (pc *ProductControllerImpl) UpdateProduct(c context.Context, req *pb.ProductRequest) (*pb.ProductResponse, error) {
-	product_id := c.Value("product_id")
-	res, err := pc.repo.Update(product_id.(int), req)
+	product_id := 0
+	if md, ok := metadata.FromIncomingContext(c); ok {
+		product_ids := md["product_id"]
+		if len(product_ids) > 0 {
+			product_id, _ = strconv.Atoi(product_ids[0])
+		}
+	}
+	res, err := pc.repo.Update(product_id, req)
 	if err != nil {
 		return &pb.ProductResponse{}, err
 	}
