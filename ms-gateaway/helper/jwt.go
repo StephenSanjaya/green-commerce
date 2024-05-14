@@ -12,6 +12,7 @@ func CreateJWT(user *pb.LoginResponse) (string, error) {
 	claims := jwt.MapClaims{
 		"id":    user.UserId,
 		"email": user.Email,
+		"role":  user.Role,
 		"exp":   time.Now().Add(time.Hour * 1).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
