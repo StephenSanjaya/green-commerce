@@ -21,7 +21,12 @@ type MockUserServiceClient struct {
 	mock.Mock
 }
 
-func (m *MockUserServiceClient) AddProductToCart(ctx context.Context, in *pb.CartRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (m *MockUserServiceClient) GetCartItems(ctx context.Context, in *pb.GetCartItemsRequest, opts ...grpc.CallOption) (*pb.GetCartItemsResponse, error) {
+	args := m.Called(ctx, in)
+	return args.Get(0).(*pb.GetCartItemsResponse), args.Error(1)
+}
+
+func (m *MockUserServiceClient) AddProductToCart(ctx context.Context, in *pb.AddProductToCartRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	args := m.Called(ctx, in)
 	return args.Get(0).(*emptypb.Empty), args.Error(1)
 }
@@ -33,6 +38,7 @@ func (m *MockUserServiceClient) TopUp(ctx context.Context, in *pb.TopUpRequest, 
 
 // Define a struct without the internal mutex for JSON marshalling
 type CartRequest struct {
+	UserId        int64   `json:"user_id"`
 	ProductId     int64   `json:"product_id"`
 	Quantity      int64   `json:"quantity"`
 	SubTotalPrice float64 `json:"sub_total_price"`
@@ -48,12 +54,14 @@ func TestAddProductToCart(t *testing.T) {
 	e := echo.New()
 
 	cartRequest := CartRequest{
+		UserId:        1,
 		ProductId:     1,
 		Quantity:      2,
 		SubTotalPrice: 100.0,
 	}
 
-	mockUserService.On("AddProductToCart", mock.Anything, &pb.CartRequest{
+	mockUserService.On("AddProductToCart", mock.Anything, &pb.AddProductToCartRequest{
+		UserId:        cartRequest.UserId,
 		ProductId:     cartRequest.ProductId,
 		Quantity:      cartRequest.Quantity,
 		SubTotalPrice: cartRequest.SubTotalPrice,

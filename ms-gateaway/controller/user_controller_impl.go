@@ -16,8 +16,25 @@ func NewUserController(userGRPC pb.UserServiceClient) UserControllerI {
 	return &UserControllerImpl{userGRPC: userGRPC}
 }
 
+func (uc *UserControllerImpl) GetCartItems(c echo.Context) error {
+	user_id := int(c.Get("id").(float64))
+	req := &pb.GetCartItemsRequest{
+		UserId: int64(user_id),
+	}
+
+	res, err := uc.userGRPC.GetCartItems(c.Request().Context(), req)
+	if err != nil {
+		return echo.NewHTTPError(int(status.Code(err)), "Failed to get products from cart: "+err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, echo.Map{
+		"message": "success get products from cart",
+		"cart":    res.Carts,
+	})
+}
+
 func (uc *UserControllerImpl) AddProductToCart(c echo.Context) error {
-	var cartRequest pb.CartRequest
+	var cartRequest pb.AddProductToCartRequest
 	if err := c.Bind(&cartRequest); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
 	}

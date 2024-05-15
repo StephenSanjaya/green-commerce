@@ -23,8 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	AddProductToCart(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AddProductToCart(ctx context.Context, in *AddProductToCartRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	TopUp(ctx context.Context, in *TopUpRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetCartItems(ctx context.Context, in *GetCartItemsRequest, opts ...grpc.CallOption) (*GetCartItemsResponse, error)
 }
 
 type userServiceClient struct {
@@ -35,7 +36,7 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) AddProductToCart(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *userServiceClient) AddProductToCart(ctx context.Context, in *AddProductToCartRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/user.UserService/AddProductToCart", in, out, opts...)
 	if err != nil {
@@ -53,12 +54,22 @@ func (c *userServiceClient) TopUp(ctx context.Context, in *TopUpRequest, opts ..
 	return out, nil
 }
 
+func (c *userServiceClient) GetCartItems(ctx context.Context, in *GetCartItemsRequest, opts ...grpc.CallOption) (*GetCartItemsResponse, error) {
+	out := new(GetCartItemsResponse)
+	err := c.cc.Invoke(ctx, "/user.UserService/GetCartItems", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	AddProductToCart(context.Context, *CartRequest) (*emptypb.Empty, error)
+	AddProductToCart(context.Context, *AddProductToCartRequest) (*emptypb.Empty, error)
 	TopUp(context.Context, *TopUpRequest) (*emptypb.Empty, error)
+	GetCartItems(context.Context, *GetCartItemsRequest) (*GetCartItemsResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -66,11 +77,14 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
-func (UnimplementedUserServiceServer) AddProductToCart(context.Context, *CartRequest) (*emptypb.Empty, error) {
+func (UnimplementedUserServiceServer) AddProductToCart(context.Context, *AddProductToCartRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddProductToCart not implemented")
 }
 func (UnimplementedUserServiceServer) TopUp(context.Context, *TopUpRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TopUp not implemented")
+}
+func (UnimplementedUserServiceServer) GetCartItems(context.Context, *GetCartItemsRequest) (*GetCartItemsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCartItems not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -86,7 +100,7 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 }
 
 func _UserService_AddProductToCart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CartRequest)
+	in := new(AddProductToCartRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -98,7 +112,7 @@ func _UserService_AddProductToCart_Handler(srv interface{}, ctx context.Context,
 		FullMethod: "/user.UserService/AddProductToCart",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).AddProductToCart(ctx, req.(*CartRequest))
+		return srv.(UserServiceServer).AddProductToCart(ctx, req.(*AddProductToCartRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -121,6 +135,24 @@ func _UserService_TopUp_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetCartItems_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCartItemsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetCartItems(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/user.UserService/GetCartItems",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetCartItems(ctx, req.(*GetCartItemsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -135,6 +167,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TopUp",
 			Handler:    _UserService_TopUp_Handler,
+		},
+		{
+			MethodName: "GetCartItems",
+			Handler:    _UserService_GetCartItems_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
