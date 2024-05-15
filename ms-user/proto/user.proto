@@ -1,0 +1,36 @@
+syntax = "proto3";
+package user;
+
+option go_package = "pb/user";
+
+import "google/protobuf/Empty.proto";
+
+service UserService {
+    rpc AddProductToCart (AddProductToCartRequest) returns (google.protobuf.Empty);
+    rpc TopUp (TopUpRequest) returns (google.protobuf.Empty);
+    rpc GetCartItems (GetCartItemsRequest) returns (GetCartItemsResponse);
+}
+
+message GetCartItemsRequest {
+    int64 user_id = 1;
+}
+message GetCartItemsResponse {
+    repeated Cart carts = 1;
+}
+message Cart {
+    int64 product_id = 1;
+    int64 quantity = 2;
+    double sub_total_price = 3;
+}
+
+message AddProductToCartRequest {
+    int64 user_id = 1;
+    int64 product_id = 2;
+    int64 quantity = 3;
+    double sub_total_price = 4;
+}
+
+message TopUpRequest {
+    int64 user_id = 1;
+    double amount = 2;
+}
