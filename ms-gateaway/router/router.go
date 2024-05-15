@@ -42,6 +42,7 @@ func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
 		user := api.Group("/user")
 		user.Use(middleware.AuthMiddleware("user"))
 		{
+			user.GET("/cart", cs.UserCtrler.GetCartItems)
 			user.POST("/topup", cs.UserCtrler.TopUp)
 			user.POST("/add-item", cs.UserCtrler.AddProductToCart)
 		}
