@@ -1,0 +1,359 @@
+basePath: /
+definitions:
+  auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  auth.RegisterRequest:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      password:
+        type: string
+    type: object
+  auth.RegisterResponse:
+    properties:
+      address:
+        type: string
+      balance:
+        type: number
+      email:
+        type: string
+      full_name:
+        type: string
+      role:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  helper.HTTPError:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  product.ProductRequest:
+    properties:
+      category_id:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
+    type: object
+  user.AddProductToCartRequest:
+    properties:
+      product_id:
+        type: integer
+      quantity:
+        type: integer
+      sub_total_price:
+        type: number
+      user_id:
+        type: integer
+    type: object
+  user.TopUpRequest:
+    properties:
+      amount:
+        type: number
+      user_id:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is an auth service.
+  title: Auth Service API
+  version: "1.0"
+paths:
+  /cart:
+    get:
+      description: Get all items in the user's cart
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get products from cart
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: failed to get products from cart
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+      summary: Get cart items
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Add a product to the user's cart
+      parameters:
+      - description: Cart Request
+        in: body
+        name: cartRequest
+        required: true
+        schema:
+          $ref: '#/definitions/user.AddProductToCartRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Product added to cart successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: invalid body request
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+        "500":
+          description: failed to add product to cart
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+      summary: Add product to cart
+      tags:
+      - users
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login a user with email and password
+      parameters:
+      - description: Login Request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+      summary: Login a user
+      tags:
+      - auth
+  /products:
+    get:
+      description: Get all products from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get all products
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+      summary: Get all products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Add a new product to the database
+      parameters:
+      - description: Product Request
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/product.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: success create product
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+      summary: Add a new product
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      description: Delete a product by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success delete product
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+      summary: Delete a product by ID
+      tags:
+      - products
+    get:
+      description: Get a product by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success get product
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+      summary: Get a product by ID
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      description: Update a product by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Product Request
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/product.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success update product
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+      summary: Update a product by ID
+      tags:
+      - products
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with full details
+      parameters:
+      - description: Register Request
+        in: body
+        name: registerRequest
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/auth.RegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+      summary: Register a new user
+      tags:
+      - auth
+  /top-up:
+    post:
+      consumes:
+      - application/json
+      description: Top up the user's balance
+      parameters:
+      - description: Top Up Request
+        in: body
+        name: topUpRequest
+        required: true
+        schema:
+          $ref: '#/definitions/user.TopUpRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: top up successful
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: invalid body request
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+        "500":
+          description: failed to top up
+          schema:
+            $ref: '#/definitions/helper.HTTPError'
+      summary: Top up user balance
+      tags:
+      - users
+swagger: "2.0"

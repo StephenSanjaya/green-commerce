@@ -5,6 +5,7 @@ import (
 	"ms-gateaway/middleware"
 
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 type ControllerStruct struct {
@@ -14,6 +15,9 @@ type ControllerStruct struct {
 }
 
 func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
+
+	// Swagger
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	api := e.Group("/api/v1")
 	{

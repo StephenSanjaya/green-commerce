@@ -6,9 +6,16 @@ import (
 	"ms-gateaway/router"
 	"os"
 
+	_ "ms-gateaway/docs"
+
 	"github.com/labstack/echo/v4"
 )
 
+// @title Auth Service API
+// @version 1.0
+// @description This is an auth service.
+// @host localhost:8080
+// @BasePath /
 func main() {
 	e := echo.New()
 	e.Use(middleware.MiddlewareLogging)
