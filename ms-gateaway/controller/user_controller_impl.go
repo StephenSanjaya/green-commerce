@@ -55,10 +55,12 @@ func (uc *UserControllerImpl) GetCartItems(c echo.Context) error {
 // @Failure 500 {object} helper.HTTPError "failed to add product to cart"
 // @Router /cart [post]
 func (uc *UserControllerImpl) AddProductToCart(c echo.Context) error {
+	user_id := int(c.Get("id").(float64))
 	var cartRequest pb.AddProductToCartRequest
 	if err := c.Bind(&cartRequest); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
 	}
+	cartRequest.UserId = int64(user_id)
 
 	_, err := uc.userGRPC.AddProductToCart(c.Request().Context(), &cartRequest)
 	if err != nil {
@@ -82,10 +84,12 @@ func (uc *UserControllerImpl) AddProductToCart(c echo.Context) error {
 // @Failure 500 {object} helper.HTTPError "failed to top up"
 // @Router /top-up [post]
 func (uc *UserControllerImpl) TopUp(c echo.Context) error {
+	user_id := int(c.Get("id").(float64))
 	req := &pb.TopUpRequest{}
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
 	}
+	req.UserId = int64(user_id)
 
 	_, err := uc.userGRPC.TopUp(c.Request().Context(), req)
 	if err != nil {
