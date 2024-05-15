@@ -70,7 +70,7 @@ func (uc *UserRepositoryImpl) FindCartItems(req *pb.GetCartItemsRequest) (*pb.Ge
 	cartItems := new([]model.Cart)
 
 	res := uc.db.Where("user_id = ?", req.UserId).Find(cartItems)
-	if res != nil {
+	if res.Error != nil {
 		return &pb.GetCartItemsResponse{}, status.Errorf(http.StatusInternalServerError, res.Error.Error())
 	}
 
