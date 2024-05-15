@@ -17,6 +17,17 @@ func NewAuthController(authGRPC pb.AuthServiceClient) AuthControllerI {
 	return &AuthControllerImpl{authGRPC: authGRPC}
 }
 
+// RegisterAuth godoc
+// @Summary Register a new user
+// @Description Register a new user with full details
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param registerRequest body pb.RegisterRequest true "Register Request"
+// @Success 201 {object} pb.RegisterResponse
+// @Failure 400 {object} helper.HTTPError
+// @Failure 500 {object} helper.HTTPError
+// @Router /register [post]
 func (ac *AuthControllerImpl) RegisterAuth(c echo.Context) error {
 	req := &pb.RegisterRequest{}
 	if err := c.Bind(&req); err != nil {
@@ -35,9 +46,19 @@ func (ac *AuthControllerImpl) RegisterAuth(c echo.Context) error {
 		"message": "success register",
 		"user":    res,
 	})
-
 }
 
+// LoginAuth godoc
+// @Summary Login a user
+// @Description Login a user with email and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param loginRequest body pb.LoginRequest true "Login Request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} helper.HTTPError
+// @Failure 500 {object} helper.HTTPError
+// @Router /login [post]
 func (ac *AuthControllerImpl) LoginAuth(c echo.Context) error {
 	req := &pb.LoginRequest{}
 	if err := c.Bind(&req); err != nil {
