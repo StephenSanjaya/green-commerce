@@ -52,7 +52,7 @@ func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
 		order.Use(middleware.AuthMiddleware("user"))
 		{
 			order.POST("/checkout", cs.OrderCtrler.CheckoutOrder)
-			order.POST("/pay", cs.OrderCtrler.PayOrder)
+			order.POST("/pay/:order_id", cs.OrderCtrler.PayOrder)
 		}
 	}
 }
