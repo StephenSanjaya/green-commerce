@@ -51,7 +51,7 @@ func (uc *UserRepositoryImpl) AddProduct(req *pb.AddProductToCartRequest) (*empt
 
 	req.SubTotalPrice = float64(req.Quantity) * product.Price
 
-	resCreate := uc.db.Create(req)
+	resCreate := uc.db.Model(&model.Cart{}).Create(req)
 	if resCreate.Error != nil {
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, resCreate.Error.Error())
 	}
