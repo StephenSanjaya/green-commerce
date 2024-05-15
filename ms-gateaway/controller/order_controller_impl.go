@@ -17,10 +17,12 @@ func NewOrderControllerImpl(orderGRPC pb.OrderServiceClient) OrderControllerI {
 }
 
 func (oc *OrderControllerImpl) CheckoutOrder(c echo.Context) error {
+	user_id := int(c.Get("id").(float64))
 	req := &pb.CheckoutOrderRequest{}
 	if err := c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
 	}
+	req.UserId = int64(user_id)
 
 	res, err := oc.orderGRPC.CheckoutOrder(c.Request().Context(), req)
 	if err != nil {
