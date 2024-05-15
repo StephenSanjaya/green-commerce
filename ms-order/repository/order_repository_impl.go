@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -28,6 +29,9 @@ func NewOrderRepositoryImpl(mongo *mongo.Collection, pg *gorm.DB) OrderRepositor
 func (or *OrderRepositoryImpl) CreateOrder(req *pb.CheckoutOrderRequest) (*pb.CheckoutOrderResponse, error) {
 	products := new([]model.CartProducts)
 	res := or.pg.Model(&model.Carts{}).Select("products.product_id, products.name, carts.quantity, products.price, carts.sub_total_price").Joins("join products on products.product_id = carts.product_id").Scan(products)
+	if res.RowsAffected == 0 {
+		return &pb.CheckoutOrderResponse{}, status.Errorf(http.StatusBadRequest, "no item in your cart")
+	}
 	if res.Error != nil {
 		return &pb.CheckoutOrderResponse{}, status.Errorf(http.StatusInternalServerError, res.Error.Error())
 	}
@@ -64,6 +68,11 @@ func (or *OrderRepositoryImpl) CreateOrder(req *pb.CheckoutOrderRequest) (*pb.Ch
 	if resVoucher.Error != nil {
 		return &pb.CheckoutOrderResponse{}, status.Errorf(http.StatusInternalServerError, resVoucher.Error.Error())
 	}
+	if req.VoucherId == 1 {
+		totalPrice = totalPrice - (totalPrice * 0.1)
+	} else if req.VoucherId == 2 {
+		totalPrice = totalPrice - (totalPrice * 0.2)
+	}
 
 	pb_payment := &pb.Payment{}
 	pb_payment.PaymentName = payment.PaymentName
@@ -81,12 +90,27 @@ func (or *OrderRepositoryImpl) CreateOrder(req *pb.CheckoutOrderRequest) (*pb.Ch
 		OrderStatus: "pending",
 		OrderDate:   time.Now().Format("2006-01-02"),
 	}
+	lk := &model.CheckoutResponse{
+		Products:    pb_product,
+		PaymentId:   int(req.PaymentId),
+		Payment:     pb_payment,
+		VoucherId:   int(req.VoucherId),
+		Voucher:     pb_voucher,
+		TotalPrice:  totalPrice,
+		OrderStatus: "pending",
+		OrderDate:   time.Now().Format("2006-01-02"),
+	}
 
-	resInsert, err := or.mongo.InsertOne(context.TODO(), x)
+	resInsert, err := or.mongo.InsertOne(context.TODO(), lk)
 	if err != nil {
 		return &pb.CheckoutOrderResponse{}, status.Errorf(http.StatusInternalServerError, err.Error())
 	}
-	x.OrderId = resInsert.InsertedID.(string)
+	x.OrderId = resInsert.InsertedID.(primitive.ObjectID).Hex()
+
+	resDel := or.pg.Where("user_id = ?", req.UserId).Delete(&model.Carts{})
+	if resDel.Error != nil {
+		return &pb.CheckoutOrderResponse{}, status.Errorf(http.StatusInternalServerError, resDel.Error.Error())
+	}
 
 	return x, nil
 }
