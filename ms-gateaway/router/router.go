@@ -29,11 +29,12 @@ func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
 
 		product := api.Group("/products")
 		{
-			product.Use(middleware.AuthMiddleware("admin"))
+			productAdmin := product.Group("")
+			productAdmin.Use(middleware.AuthMiddleware("admin"))
 			{
-				product.POST("", cs.ProductCtrler.AddProduct)
-				product.PUT("/:id", cs.ProductCtrler.UpdateProduct)
-				product.DELETE("/:id", cs.ProductCtrler.DeleteProduct)
+				productAdmin.POST("", cs.ProductCtrler.AddProduct)
+				productAdmin.PUT("/:id", cs.ProductCtrler.UpdateProduct)
+				productAdmin.DELETE("/:id", cs.ProductCtrler.DeleteProduct)
 			}
 			product.GET("", cs.ProductCtrler.GetAllProduct)
 			product.GET("/:id", cs.ProductCtrler.GetProduct)
