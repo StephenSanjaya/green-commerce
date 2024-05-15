@@ -1,14 +1,18 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	pb "ms-order/pb/order"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type CheckoutResponse struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty"`
-	Products    []Product          `bson:"products"`
+	Products    []*pb.Product      `bson:"products"`
 	PaymentId   int                `bson:"payment_id"`
-	Payment     Payment            `bson:"payment"`
+	Payment     *pb.Payment        `bson:"payment"`
 	VoucherId   int                `bson:"voucher_id"`
-	Voucher     Voucher            `bson:"voucher"`
+	Voucher     *pb.Voucher        `bson:"voucher"`
 	TotalPrice  float64            `bson:"total_price"`
 	OrderStatus string             `bson:"order_status"`
 	OrderDate   string             `bson:"order_date"`
