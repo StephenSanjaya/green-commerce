@@ -12,11 +12,11 @@ type ControllerStruct struct {
 	AuthCtrler    controller.AuthControllerI
 	ProductCtrler controller.ProductControllerI
 	UserCtrler    controller.UserControllerI
+	OrderCtrler   controller.OrderControllerI
 }
 
 func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
 
-	// Swagger
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	api := e.Group("/api/v1")
@@ -46,6 +46,13 @@ func (cs ControllerStruct) SetupRouter(e *echo.Echo) {
 			user.GET("/cart", cs.UserCtrler.GetCartItems)
 			user.POST("/topup", cs.UserCtrler.TopUp)
 			user.POST("/add-item", cs.UserCtrler.AddProductToCart)
+		}
+
+		order := api.Group("/orders")
+		order.Use(middleware.AuthMiddleware("user"))
+		{
+			order.POST("/checkout", cs.OrderCtrler.CheckoutOrder)
+			order.POST("/pay", cs.OrderCtrler.PayOrder)
 		}
 	}
 }
