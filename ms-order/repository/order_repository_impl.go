@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ms-order/model"
 	pb "ms-order/pb/order"
 	"net/http"
@@ -124,27 +125,23 @@ func (or *OrderRepositoryImpl) PayOrder(req *pb.PayOrderRequest) (*emptypb.Empty
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, resUser.Error.Error())
 	}
 
-	res := or.mongo.FindOne(context.Background(), bson.M{"order_id": req.OrderId})
+	primitive_order_id, _ := primitive.ObjectIDFromHex(req.OrderId)
+	res := or.mongo.FindOne(context.Background(), bson.M{"_id": primitive_order_id})
 	if res.Err() != nil {
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, "failed to get order")
 	}
 
-	JSONData := struct {
-		TotalPrice  float64         `bson:"total_price"`
-		OrderStatus string          `bson:"order_status"`
-		Products    []model.Product `bson:"products"`
-	}{}
-
-	decodeError := res.Decode(&JSONData)
+	resJSON := &model.CheckoutResponse{}
+	decodeError := res.Decode(resJSON)
 	if decodeError != nil {
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, "failed to decode")
 	}
-	if JSONData.OrderStatus == "settlement" {
+	fmt.Println(resJSON)
+	if resJSON.OrderStatus == "settlement" {
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, "already paid this order")
 	}
-	if user.Balance < JSONData.TotalPrice {
+	if user.Balance < resJSON.TotalPrice {
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, "balance not enough")
 	}
-
 	return &emptypb.Empty{}, nil
 }
