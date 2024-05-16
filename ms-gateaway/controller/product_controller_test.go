@@ -99,7 +99,7 @@ func TestGetProduct(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var response map[string]interface{}
 		json.Unmarshal(rec.Body.Bytes(), &response)
-		assert.Equal(t, "sucess get product", response["message"])
+		assert.Equal(t, "success get product", response["message"])
 		assert.NotNil(t, response["product"])
 	}
 }
@@ -157,7 +157,7 @@ func TestDeleteProduct(t *testing.T) {
 	c.SetParamValues("1")
 
 	if assert.NoError(t, controller.DeleteProduct(c)) {
-		assert.Equal(t, http.StatusCreated, rec.Code)
+		assert.Equal(t, http.StatusOK, rec.Code)
 		var response map[string]interface{}
 		json.Unmarshal(rec.Body.Bytes(), &response)
 		assert.Equal(t, "success delete product", response["message"])

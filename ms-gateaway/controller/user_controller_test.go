@@ -28,15 +28,14 @@ func (m *MockUserServiceClient) GetCartItems(ctx context.Context, in *pb.GetCart
 
 func (m *MockUserServiceClient) AddProductToCart(ctx context.Context, in *pb.AddProductToCartRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	args := m.Called(ctx, in)
-	return args.Get(0).(*emptypb.Empty), args.Error(1)
+	return &emptypb.Empty{}, args.Error(1)
 }
 
 func (m *MockUserServiceClient) TopUp(ctx context.Context, in *pb.TopUpRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	args := m.Called(ctx, in)
-	return args.Get(0).(*emptypb.Empty), args.Error(1)
+	return &emptypb.Empty{}, args.Error(1)
 }
 
-// Define a struct without the internal mutex for JSON marshalling
 type CartRequest struct {
 	UserId        int64   `json:"user_id"`
 	ProductId     int64   `json:"product_id"`
@@ -73,6 +72,9 @@ func TestAddProductToCart(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
+	// Setting user_id in context
+	c.Set("id", float64(1))
+
 	if assert.NoError(t, controller.AddProductToCart(c)) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
 		var response map[string]interface{}
@@ -91,6 +93,7 @@ func TestTopUp(t *testing.T) {
 	}
 
 	mockUserService.On("TopUp", mock.Anything, &pb.TopUpRequest{
+		UserId: 1,
 		Amount: topUpRequest.Amount,
 	}).Return(&emptypb.Empty{}, nil)
 
@@ -100,10 +103,49 @@ func TestTopUp(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
+	// Setting user_id in context
+	c.Set("id", float64(1))
+	c.Set("email", "test@email.com")
+
 	if assert.NoError(t, controller.TopUp(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var response map[string]interface{}
 		json.Unmarshal(rec.Body.Bytes(), &response)
 		assert.Equal(t, "top up successful", response["message"])
+	}
+}
+
+func TestGetCartItems(t *testing.T) {
+	mockUserService := new(MockUserServiceClient)
+	controller := controller.NewUserController(mockUserService)
+	e := echo.New()
+
+	mockResponse := &pb.GetCartItemsResponse{
+		Carts: []*pb.Cart{
+			{
+				ProductId:     1,
+				Quantity:      2,
+				SubTotalPrice: 100.0,
+			},
+		},
+	}
+
+	mockUserService.On("GetCartItems", mock.Anything, &pb.GetCartItemsRequest{
+		UserId: 1,
+	}).Return(mockResponse, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/cart", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	// Setting user_id in context
+	c.Set("id", float64(1))
+
+	if assert.NoError(t, controller.GetCartItems(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var response map[string]interface{}
+		json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.Equal(t, "success get products from cart", response["message"])
+		assert.NotNil(t, response["cart"])
 	}
 }
