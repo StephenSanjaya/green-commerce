@@ -42,6 +42,8 @@ func (ac *AuthControllerImpl) RegisterAuth(c echo.Context) error {
 		return echo.NewHTTPError(int(status.Code(err)), "invalid body request: "+err.Error())
 	}
 
+	helper.SendSuccessRegister(req.Email)
+
 	return c.JSON(http.StatusCreated, echo.Map{
 		"message": "success register",
 		"user":    res,
