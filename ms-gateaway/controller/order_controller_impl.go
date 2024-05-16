@@ -5,7 +5,7 @@ import (
 	pb "ms-gateaway/pb/order"
 	"net/http"
 
-	echo "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc/status"
 )
 
@@ -17,6 +17,14 @@ func NewOrderControllerImpl(orderGRPC pb.OrderServiceClient) OrderControllerI {
 	return &OrderControllerImpl{orderGRPC: orderGRPC}
 }
 
+// @Summary Checkout an order
+// @Description Checkout an order
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer {token}"
+// @Param order body pb.CheckoutOrderRequest true "Order details"
+// @Success 201 {object} pb.CheckoutOrderResponse
+// @Router /orders/checkout [post]
 func (oc *OrderControllerImpl) CheckoutOrder(c echo.Context) error {
 	user_id := int(c.Get("id").(float64))
 	email := c.Get("email").(string)
@@ -45,6 +53,14 @@ func (oc *OrderControllerImpl) CheckoutOrder(c echo.Context) error {
 	})
 }
 
+// @Summary Pay for an order
+// @Description Pay for an order
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer {token}"
+// @Param order_id path string true "Order ID"
+// @Success 200 {object} pb.PayOrderResponse
+// @Router /orders/{order_id}/pay [post]
 func (oc *OrderControllerImpl) PayOrder(c echo.Context) error {
 	user_id := int(c.Get("id").(float64))
 	order_id := c.Param("order_id")
