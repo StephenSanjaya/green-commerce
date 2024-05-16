@@ -6,6 +6,7 @@ import (
 	"ms-product/controller"
 	pb "ms-product/pb/product"
 	"net"
+	"os"
 
 	"google.golang.org/grpc"
 )
@@ -15,7 +16,8 @@ func InitGrpc(productCtrler *controller.ProductControllerImpl) {
 	grpcServer := grpc.NewServer()
 	pb.RegisterProductServiceServer(grpcServer, productCtrler)
 
-	listen, err := net.Listen("tcp", ":50052")
+	port := os.Getenv("PORT")
+	listen, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Println(err)
 	}
