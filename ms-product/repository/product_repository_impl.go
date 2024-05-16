@@ -1,21 +1,64 @@
 package repository
 
 import (
+	"context"
+	"encoding/json"
 	"ms-product/model"
 	pb "ms-product/pb/product"
 	"net/http"
+	"time"
 
+	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc/status"
-
 	"gorm.io/gorm"
 )
 
 type ProductRepositoryImpl struct {
-	db *gorm.DB
+	db    *gorm.DB
+	redis *redis.Client
 }
 
-func NewProductRepositoryImpl(db *gorm.DB) ProductRepositoryI {
-	return &ProductRepositoryImpl{db: db}
+func NewProductRepositoryImpl(db *gorm.DB, redisClient *redis.Client) ProductRepositoryI {
+	return &ProductRepositoryImpl{db: db, redis: redisClient}
+}
+
+func (pr *ProductRepositoryImpl) FindAll() (*pb.ProductResponses, error) {
+	ctx := context.Background()
+	cacheKey := "products:all"
+
+	cachedData, err := pr.redis.Get(ctx, cacheKey).Result()
+	if err == nil {
+		var cachedProducts pb.ProductResponses
+		if err := json.Unmarshal([]byte(cachedData), &cachedProducts); err == nil {
+			return &cachedProducts, nil
+		}
+	}
+
+	products := new([]model.Product)
+	res := pr.db.Find(products)
+	if res.Error != nil {
+		return &pb.ProductResponses{}, status.Errorf(http.StatusInternalServerError, res.Error.Error())
+	}
+
+	y := pb.ProductResponses{}
+	for _, p := range *products {
+		x := pb.ProductResponse{
+			ProductId:   int64(p.ID),
+			CategoryId:  int64(p.CategoryId),
+			Name:        p.Name,
+			Description: p.Description,
+			Stock:       p.Stock,
+			Price:       p.Price,
+		}
+		y.Products = append(y.Products, &x)
+	}
+
+	dataToCache, err := json.Marshal(&y)
+	if err == nil {
+		pr.redis.Set(ctx, cacheKey, dataToCache, time.Hour).Err()
+	}
+
+	return &y, nil
 }
 
 func (pr *ProductRepositoryImpl) Create(req *pb.ProductRequest) (*pb.ProductResponse, error) {
@@ -39,30 +82,6 @@ func (pr *ProductRepositoryImpl) Create(req *pb.ProductRequest) (*pb.ProductResp
 		Stock:       product.Stock,
 		Price:       product.Price,
 	}, nil
-}
-
-func (pr *ProductRepositoryImpl) FindAll() (*pb.ProductResponses, error) {
-	products := new([]model.Product)
-
-	res := pr.db.Find(products)
-	if res.Error != nil {
-		return &pb.ProductResponses{}, status.Errorf(http.StatusInternalServerError, res.Error.Error())
-	}
-
-	y := pb.ProductResponses{}
-	for _, p := range *products {
-		x := pb.ProductResponse{
-			ProductId:   int64(p.ID),
-			CategoryId:  int64(p.CategoryId),
-			Name:        p.Name,
-			Description: p.Description,
-			Stock:       p.Stock,
-			Price:       p.Price,
-		}
-		y.Products = append(y.Products, &x)
-	}
-
-	return &y, nil
 }
 
 func (pr *ProductRepositoryImpl) FindOne(id int) (*pb.ProductResponse, error) {
