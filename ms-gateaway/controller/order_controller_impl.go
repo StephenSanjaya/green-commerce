@@ -17,10 +17,12 @@ func NewOrderControllerImpl(orderGRPC pb.OrderServiceClient) OrderControllerI {
 	return &OrderControllerImpl{orderGRPC: orderGRPC}
 }
 
+// CheckoutProduct godoc
 // @Summary Checkout an order
 // @Description Checkout an order
 // @Accept json
 // @Produce json
+// @Tags orders
 // @Param Authorization header string true "Bearer {token}"
 // @Param order body pb.CheckoutOrderRequest true "Order details"
 // @Success 201 {object} pb.CheckoutOrderResponse
@@ -52,29 +54,30 @@ func (oc *OrderControllerImpl) CheckoutOrder(c echo.Context) error {
 		"invoice_url": url,
 	})
 }
-
+// PayOrder godoc
 // @Summary Pay for an order
 // @Description Pay for an order
+// @Tags orders
 // @Accept json
 // @Produce json
 // @Param Authorization header string true "Bearer {token}"
 // @Param order_id path string true "Order ID"
-// @Success 200 {object} pb.PayOrderResponse
+// @Success 201 {object} string 
 // @Router /orders/{order_id}/pay [post]
 func (oc *OrderControllerImpl) PayOrder(c echo.Context) error {
-	user_id := int(c.Get("id").(float64))
-	order_id := c.Param("order_id")
-	req := &pb.PayOrderRequest{
-		UserId:  int64(user_id),
-		OrderId: order_id,
-	}
+    user_id := int(c.Get("id").(float64))
+    order_id := c.Param("order_id")
+    req := &pb.PayOrderRequest{
+        UserId:  int64(user_id),
+        OrderId: order_id,
+    }
 
-	_, err := oc.orderGRPC.PayOrder(c.Request().Context(), req)
-	if err != nil {
-		return echo.NewHTTPError(int(status.Code(err)), "failed to pay order: "+err.Error())
-	}
+    _, err := oc.orderGRPC.PayOrder(c.Request().Context(), req)
+    if err != nil {
+        return echo.NewHTTPError(int(status.Code(err)), "failed to pay order: "+err.Error())
+    }
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"message": "success pay order",
-	})
+    return c.JSON(http.StatusOK, echo.Map{
+        "message": "success pay order",
+    })
 }

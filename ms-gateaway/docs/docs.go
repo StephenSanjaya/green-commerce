@@ -134,6 +134,86 @@ const docTemplate = `{
                 }
             }
         },
+        "/orders/checkout": {
+            "post": {
+                "description": "Checkout an order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Checkout an order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Order details",
+                        "name": "order",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/order.CheckoutOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/order.CheckoutOrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{order_id}/pay": {
+            "post": {
+                "description": "Pay for an order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Pay for an order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer {token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/products": {
             "get": {
                 "description": "Get all products from the database",
@@ -493,6 +573,91 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "order.CheckoutOrderRequest": {
+            "type": "object",
+            "properties": {
+                "payment_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "voucher_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "order.CheckoutOrderResponse": {
+            "type": "object",
+            "properties": {
+                "order_date": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "order_status": {
+                    "type": "string"
+                },
+                "payment": {
+                    "$ref": "#/definitions/order.Payment"
+                },
+                "payment_id": {
+                    "type": "integer"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/order.Product"
+                    }
+                },
+                "total_price": {
+                    "type": "number"
+                },
+                "voucher": {
+                    "$ref": "#/definitions/order.Voucher"
+                },
+                "voucher_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "order.Payment": {
+            "type": "object",
+            "properties": {
+                "payment_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "order.Product": {
+            "type": "object",
+            "properties": {
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "product_name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "sub_total_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "order.Voucher": {
+            "type": "object",
+            "properties": {
+                "voucher_name": {
                     "type": "string"
                 }
             }

@@ -40,6 +40,61 @@ definitions:
       message:
         type: string
     type: object
+  order.CheckoutOrderRequest:
+    properties:
+      payment_id:
+        type: integer
+      user_id:
+        type: integer
+      voucher_id:
+        type: integer
+    type: object
+  order.CheckoutOrderResponse:
+    properties:
+      order_date:
+        type: string
+      order_id:
+        type: string
+      order_status:
+        type: string
+      payment:
+        $ref: '#/definitions/order.Payment'
+      payment_id:
+        type: integer
+      products:
+        items:
+          $ref: '#/definitions/order.Product'
+        type: array
+      total_price:
+        type: number
+      voucher:
+        $ref: '#/definitions/order.Voucher'
+      voucher_id:
+        type: integer
+    type: object
+  order.Payment:
+    properties:
+      payment_name:
+        type: string
+    type: object
+  order.Product:
+    properties:
+      price:
+        type: number
+      product_id:
+        type: integer
+      product_name:
+        type: string
+      quantity:
+        type: integer
+      sub_total_price:
+        type: number
+    type: object
+  order.Voucher:
+    properties:
+      voucher_name:
+        type: string
+    type: object
   product.ProductRequest:
     properties:
       category_id:
@@ -157,6 +212,59 @@ paths:
       summary: Login a user
       tags:
       - auth
+  /orders/{order_id}/pay:
+    post:
+      consumes:
+      - application/json
+      description: Pay for an order
+      parameters:
+      - description: Bearer {token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+      summary: Pay for an order
+      tags:
+      - orders
+  /orders/checkout:
+    post:
+      consumes:
+      - application/json
+      description: Checkout an order
+      parameters:
+      - description: Bearer {token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Order details
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/order.CheckoutOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/order.CheckoutOrderResponse'
+      summary: Checkout an order
+      tags:
+      - orders
   /products:
     get:
       description: Get all products from the database
