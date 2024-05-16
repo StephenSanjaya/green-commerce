@@ -62,6 +62,9 @@ func (pr *ProductRepositoryImpl) FindAll() (*pb.ProductResponses, error) {
 }
 
 func (pr *ProductRepositoryImpl) Create(req *pb.ProductRequest) (*pb.ProductResponse, error) {
+	ctx := context.Background()
+	cacheKey := "products:all"
+
 	product := &model.Product{
 		CategoryId:  int(req.CategoryId),
 		Name:        req.Name,
@@ -73,6 +76,8 @@ func (pr *ProductRepositoryImpl) Create(req *pb.ProductRequest) (*pb.ProductResp
 	if res.Error != nil {
 		return &pb.ProductResponse{}, status.Errorf(http.StatusInternalServerError, res.Error.Error())
 	}
+
+	pr.redis.Del(ctx, cacheKey)
 
 	return &pb.ProductResponse{
 		ProductId:   int64(product.ID),
@@ -105,6 +110,9 @@ func (pr *ProductRepositoryImpl) FindOne(id int) (*pb.ProductResponse, error) {
 }
 
 func (pr *ProductRepositoryImpl) Update(id int, req *pb.ProductRequest) (*pb.ProductResponse, error) {
+	ctx := context.Background()
+	cacheKey := "products:all"
+
 	product := new(model.Product)
 	res := pr.db.Model(product).Where("product_id = ?", id).Updates(model.Product{
 		CategoryId:  int(req.CategoryId),
@@ -120,6 +128,8 @@ func (pr *ProductRepositoryImpl) Update(id int, req *pb.ProductRequest) (*pb.Pro
 		return &pb.ProductResponse{}, status.Errorf(http.StatusInternalServerError, res.Error.Error())
 	}
 
+	pr.redis.Del(ctx, cacheKey)
+
 	return &pb.ProductResponse{
 		ProductId:   int64(product.ID),
 		CategoryId:  int64(product.CategoryId),
@@ -131,6 +141,9 @@ func (pr *ProductRepositoryImpl) Update(id int, req *pb.ProductRequest) (*pb.Pro
 }
 
 func (pr *ProductRepositoryImpl) Delete(id int) error {
+	ctx := context.Background()
+	cacheKey := "products:all"
+
 	res := pr.db.Delete(&model.Product{}, id)
 	if res.RowsAffected == 0 {
 		return status.Errorf(http.StatusNotFound, "product id not found")
@@ -138,6 +151,8 @@ func (pr *ProductRepositoryImpl) Delete(id int) error {
 	if res.Error != nil {
 		return status.Errorf(http.StatusInternalServerError, res.Error.Error())
 	}
+
+	pr.redis.Del(ctx, cacheKey)
 
 	return nil
 }
