@@ -24,6 +24,7 @@ type CartProducts struct {
 	Quantity      int     `json:"quantity"`
 	Price         float64 `json:"price"`
 	SubTotalPrice float64 `json:"sub_total_price"`
+	Stock         int     `json:"stock"`
 }
 
 type Carts struct {

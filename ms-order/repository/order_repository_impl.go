@@ -28,7 +28,7 @@ func NewOrderRepositoryImpl(mongo *mongo.Collection, pg *gorm.DB) OrderRepositor
 
 func (or *OrderRepositoryImpl) CreateOrder(req *pb.CheckoutOrderRequest) (*pb.CheckoutOrderResponse, error) {
 	products := new([]model.CartProducts)
-	res := or.pg.Model(&model.Carts{}).Select("products.product_id, products.name, carts.quantity, products.price, carts.sub_total_price").Joins("join products on products.product_id = carts.product_id").Scan(products)
+	res := or.pg.Model(&model.Carts{}).Select("products.product_id, products.name, carts.quantity, products.price, carts.sub_total_price, products.stock").Joins("join products on products.product_id = carts.product_id").Scan(products)
 	if res.RowsAffected == 0 {
 		return &pb.CheckoutOrderResponse{}, status.Errorf(http.StatusBadRequest, "no item in your cart")
 	}
@@ -39,16 +39,31 @@ func (or *OrderRepositoryImpl) CreateOrder(req *pb.CheckoutOrderRequest) (*pb.Ch
 	totalPrice := 0.0
 	pb_product := []*pb.Product{}
 
-	for _, p := range *products {
-		l := &pb.Product{
-			ProductId:     int64(p.ProductId),
-			ProductName:   p.Name,
-			Quantity:      int64(p.Quantity),
-			Price:         p.Price,
-			SubTotalPrice: p.SubTotalPrice,
+	errTx := or.pg.Transaction(func(tx *gorm.DB) error {
+		for _, p := range *products {
+			if p.Quantity > p.Stock {
+				errMsg := fmt.Sprintf("product: %s [%d], quantity: [%d] error: stock is not enough!", p.Name, p.Stock, p.Quantity)
+				return status.Errorf(http.StatusBadRequest, errMsg)
+			}
+			currStock := p.Stock - p.Quantity
+			res := tx.Model(&model.Product{}).Where("product_id = ?", p.ProductId).Update("stock", currStock)
+			if res.Error != nil {
+				return status.Errorf(http.StatusInternalServerError, res.Error.Error())
+			}
+			l := &pb.Product{
+				ProductId:     int64(p.ProductId),
+				ProductName:   p.Name,
+				Quantity:      int64(p.Quantity),
+				Price:         p.Price,
+				SubTotalPrice: p.SubTotalPrice,
+			}
+			totalPrice += p.SubTotalPrice
+			pb_product = append(pb_product, l)
 		}
-		totalPrice += p.SubTotalPrice
-		pb_product = append(pb_product, l)
+		return nil
+	})
+	if errTx != nil {
+		return &pb.CheckoutOrderResponse{}, errTx
 	}
 
 	payment := new(model.Payment)
@@ -143,5 +158,12 @@ func (or *OrderRepositoryImpl) PayOrder(req *pb.PayOrderRequest) (*emptypb.Empty
 	if user.Balance < resJSON.TotalPrice {
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, "balance not enough")
 	}
+	currBalance := user.Balance - resJSON.TotalPrice
+
+	resUpdate := or.pg.Model(&model.User{}).Where("user_id = ?", req.UserId).Update("balance", currBalance)
+	if resUpdate.Error != nil {
+		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, resUpdate.Error.Error())
+	}
+
 	return &emptypb.Empty{}, nil
 }
