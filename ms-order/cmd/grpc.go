@@ -6,6 +6,7 @@ import (
 	"ms-order/controller"
 	pb "ms-order/pb/order"
 	"net"
+	"os"
 
 	"google.golang.org/grpc"
 )
@@ -15,7 +16,8 @@ func InitGrpc(orderCtrler *controller.OrderControllerImpl) {
 	grpcServer := grpc.NewServer()
 	pb.RegisterOrderServiceServer(grpcServer, orderCtrler)
 
-	listen, err := net.Listen("tcp", ":50054")
+	port := os.Getenv("PORT")
+	listen, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Println(err)
 	}
