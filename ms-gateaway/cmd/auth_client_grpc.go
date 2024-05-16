@@ -1,18 +1,30 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"log"
 	"ms-gateaway/controller"
 	pb "ms-gateaway/pb/auth"
+	"os"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 )
 
 func AuthClientGRPC() controller.AuthControllerI {
-	authConn, err := grpc.Dial(":50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	port := os.Getenv("PORT_GRPC")
+	host := os.Getenv("MS_AUTH_HOST")
+	creds := credentials.NewTLS(&tls.Config{
+		InsecureSkipVerify: true,
+	})
+
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(creds),
+	}
+
+	authConn, err := grpc.Dial(host+":"+port, opts...)
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Fatal(err)
 	}
 
 	authClient := pb.NewAuthServiceClient(authConn)
