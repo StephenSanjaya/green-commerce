@@ -9,8 +9,9 @@ import (
 
 func main() {
 	db := config.GetConnection()
+	redis := config.SetupRedis()
 
-	productRepo := repository.NewProductRepositoryImpl(db)
+	productRepo := repository.NewProductRepositoryImpl(db, redis)
 	productCtrler := controller.NewProductControllerImpl(productRepo)
 
 	cmd.InitGrpc(productCtrler.(*controller.ProductControllerImpl))
