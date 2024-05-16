@@ -6,6 +6,7 @@ import (
 	"ms-auth/controller"
 	pb "ms-auth/pb/auth"
 	"net"
+	"os"
 
 	"google.golang.org/grpc"
 )
@@ -15,7 +16,8 @@ func InitGrpc(paymentCtrler *controller.AuthControllerImpl) {
 	grpcServer := grpc.NewServer()
 	pb.RegisterAuthServiceServer(grpcServer, paymentCtrler)
 
-	listen, err := net.Listen("tcp", ":50051")
+	port := os.Getenv("PORT")
+	listen, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Println(err)
 	}
