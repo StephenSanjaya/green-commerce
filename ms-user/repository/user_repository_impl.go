@@ -77,7 +77,7 @@ func (uc *UserRepositoryImpl) FindCartItems(req *pb.GetCartItemsRequest) (*pb.Ge
 	y := pb.GetCartItemsResponse{}
 	for _, i := range *cartItems {
 		x := pb.Cart{
-			ProductId:     int64(i.ID),
+			ProductId:     int64(i.ProductId),
 			Quantity:      int64(i.Quantity),
 			SubTotalPrice: i.SubTotalPrice,
 		}
