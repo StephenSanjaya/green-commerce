@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -24,7 +25,7 @@ func SendMail(email, subject, content string) {
 	d := gomail.NewDialer(host, port, username, password)
 
 	if err := d.DialAndSend(m); err != nil {
-		panic(err)
+		log.Default().Println("err: ", err)
 	}
 }
 
