@@ -105,6 +105,7 @@ func TestTopUp(t *testing.T) {
 
 	// Setting user_id in context
 	c.Set("id", float64(1))
+	c.Set("email", "test@email.com")
 
 	if assert.NoError(t, controller.TopUp(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)

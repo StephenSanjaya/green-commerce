@@ -7,14 +7,15 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"ms-gateaway/controller"
+	pb "ms-gateaway/pb/order"
+
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
-	"ms-gateaway/controller"
-	pb "ms-gateaway/pb/order"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -45,7 +46,6 @@ func TestOrderController_CheckoutOrder(t *testing.T) {
 	orderController := controller.NewOrderControllerImpl(mockClient)
 
 	t.Run("success", func(t *testing.T) {
-		// Mock the gRPC response
 		mockResponse := &pb.CheckoutOrderResponse{
 			OrderId: "123",
 			Products: []*pb.Product{
@@ -72,6 +72,7 @@ func TestOrderController_CheckoutOrder(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.Set("id", float64(1)) // Mock user ID
+		c.Set("email", "test@email.com")
 
 		// Call the controller method
 		err := orderController.CheckoutOrder(c)
@@ -94,6 +95,7 @@ func TestOrderController_CheckoutOrder(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.Set("id", float64(1)) // Mock user ID
+		c.Set("email", "test@email.com")
 
 		// Call the controller method
 		err := orderController.CheckoutOrder(c)
@@ -103,7 +105,7 @@ func TestOrderController_CheckoutOrder(t *testing.T) {
 		httpErr, ok := err.(*echo.HTTPError)
 		require.True(t, ok)
 		assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
-		assert.Equal(t, "failed to checkout order: rpc error: code = Unknown desc = internal error", httpErr.Message)
+		assert.Equal(t, "failed to checkout order: rpc error: code = Code(500) desc = internal error", httpErr.Message)
 	})
 }
 
