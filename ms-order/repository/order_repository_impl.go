@@ -141,7 +141,7 @@ func (or *OrderRepositoryImpl) PayOrder(req *pb.PayOrderRequest) (*emptypb.Empty
 	}
 
 	primitive_order_id, _ := primitive.ObjectIDFromHex(req.OrderId)
-	res := or.mongo.FindOne(context.Background(), bson.M{"_id": primitive_order_id})
+	res := or.mongo.FindOne(context.TODO(), bson.M{"_id": primitive_order_id})
 	if res.Err() != nil {
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, "failed to get order")
 	}
@@ -151,7 +151,6 @@ func (or *OrderRepositoryImpl) PayOrder(req *pb.PayOrderRequest) (*emptypb.Empty
 	if decodeError != nil {
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, "failed to decode")
 	}
-	fmt.Println(resJSON)
 	if resJSON.OrderStatus == "settlement" {
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, "already paid this order")
 	}
@@ -163,6 +162,11 @@ func (or *OrderRepositoryImpl) PayOrder(req *pb.PayOrderRequest) (*emptypb.Empty
 	resUpdate := or.pg.Model(&model.User{}).Where("user_id = ?", req.UserId).Update("balance", currBalance)
 	if resUpdate.Error != nil {
 		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, resUpdate.Error.Error())
+	}
+
+	_, err := or.mongo.UpdateOne(context.TODO(), bson.M{"_id": primitive_order_id}, bson.M{"$set": bson.M{"order_status": "settlement"}})
+	if err != nil {
+		return &emptypb.Empty{}, status.Errorf(http.StatusInternalServerError, err.Error())
 	}
 
 	return &emptypb.Empty{}, nil
