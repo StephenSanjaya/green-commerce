@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"ms-gateaway/helper"
 	pb "ms-gateaway/pb/user"
 	"net/http"
 
@@ -85,6 +86,7 @@ func (uc *UserControllerImpl) AddProductToCart(c echo.Context) error {
 // @Router /top-up [post]
 func (uc *UserControllerImpl) TopUp(c echo.Context) error {
 	user_id := int(c.Get("id").(float64))
+	email := c.Get("email").(string)
 	req := &pb.TopUpRequest{}
 	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid body request: "+err.Error())
@@ -96,7 +98,15 @@ func (uc *UserControllerImpl) TopUp(c echo.Context) error {
 		return echo.NewHTTPError(int(status.Code(err)), "failed to top up: "+err.Error())
 	}
 
+	url, errInv := helper.CreateInvoiceTopUp(req.Amount)
+	if errInv != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create invoice: "+errInv.Error())
+	}
+
+	helper.SendSuccessCheckout(email, url)
+
 	return c.JSON(http.StatusOK, echo.Map{
-		"message": "top up successful",
+		"message":     "top up successful",
+		"invoice_url": url,
 	})
 }

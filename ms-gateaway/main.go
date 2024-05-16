@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"ms-gateaway/cmd"
 	"ms-gateaway/middleware"
 	"ms-gateaway/router"
@@ -8,6 +9,7 @@ import (
 
 	_ "ms-gateaway/docs"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,6 +22,11 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.MiddlewareLogging)
 	e.HTTPErrorHandler = middleware.ErrorHandler
+
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println(err)
+	}
 
 	authCtrler := cmd.AuthClientGRPC()
 	productCtrler := cmd.ProductClientGRPC()
