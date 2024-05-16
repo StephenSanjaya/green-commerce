@@ -49,5 +49,8 @@ func ErrorHandler(err error, c echo.Context) {
 
 	MakeLogEntry(c).Error(report.Message)
 
+	if report.Code == 14 {
+		report.Code = 500
+	}
 	c.JSON(report.Code, report.Message.(map[string]interface{}))
 }
