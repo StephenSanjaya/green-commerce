@@ -6,6 +6,7 @@ import (
 	"ms-user/controller"
 	pb "ms-user/pb/user"
 	"net"
+	"os"
 
 	"google.golang.org/grpc"
 )
@@ -15,7 +16,8 @@ func InitGrpc(userCtrler *controller.UserControllerImpl) {
 	grpcServer := grpc.NewServer()
 	pb.RegisterUserServiceServer(grpcServer, userCtrler)
 
-	listen, err := net.Listen("tcp", ":50053")
+	port := os.Getenv("PORT")
+	listen, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Println(err)
 	}
