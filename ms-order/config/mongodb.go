@@ -29,7 +29,7 @@ func GetMongoConnection() *Database {
 
 		mongo_uri := os.Getenv("MONGO_URI")
 		mongo_name := os.Getenv("MONGO_NAME")
-		mongo_coll := os.Getenv("MONGO_COLLECTIOn")
+		mongo_coll := os.Getenv("MONGO_COLLECTION")
 
 		client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongo_uri))
 		if err != nil {
