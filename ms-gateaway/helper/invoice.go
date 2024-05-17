@@ -17,13 +17,22 @@ func CreateInvoiceCheckout(res *pb.CheckoutOrderResponse) (string, error) {
 	apiKey := os.Getenv("XENDIT_API_KEY")
 	apiUrl := "https://api.xendit.co/v2/invoices"
 
+	data := []map[string]interface{}{}
+	for _, p := range res.Products {
+		d := map[string]interface{}{}
+		d["name"] = p.ProductName
+		d["quantity"] = p.Quantity
+		d["price"] = p.Price
+		data = append(data, d)
+	}
+
 	bodyRequest := map[string]interface{}{
 		"external_id":      "1",
 		"amount":           res.TotalPrice,
 		"description":      "Dummy Invoice Final Project",
 		"invoice_duration": 86400,
 		"currency":         "IDR",
-		"items":            res.Products,
+		"items":            data,
 	}
 
 	reqBody, err := json.Marshal(bodyRequest)
